@@ -1,0 +1,39 @@
+# ambil dari ubuntu
+FROM ubuntu:16.04
+
+# update dan install aplikasi nginx php7.0-fpm php7.0-mysql mariadb-server -y
+RUN apt update && \
+    apt install nginx php7.0-fpm php7.0-mysql mariadb-server -y
+
+# hapus direktori /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default && \
+# buat direktori mywebsite/ di /var/www/html/
+RUN rm /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default && \
+    mkdir /var/www/html/mywebsite/
+
+#copy file nginx.conf dan letakkan di /etc/nginx/
+COPY nginx.conf /etc/nginx/nginx.conf
+
+#copy file default dan letakkan di /etc/nginx/sites-available/
+COPY default /etc/nginx/sites-available/default
+
+#copy file index.php dan letakkan di /var/www/html/mywebsite/
+COPY index.php /var/www/html/mywebsite/index.php
+
+#copy file dbku.sql dan letakkan di /var/
+COPY dbku.sql /var/dbku.sql
+
+#copy file script.sh dan letakkan di /var/run/
+COPY script.sh /var/run/script.sh
+# izin untuk script.sh
+RUN chmod 777 /var/run/script.sh
+
+# jalankan default 
+# hak akses menjadi www-data untuk directori /var/www/html/mywebsite 
+RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default && \
+    chown -R www-data:www-data /var/www/html/mywebsite 
+
+# jalankan di port 80 dan 3306
+EXPOSE 80 3306
+
+#jalankan file script.sh
+CMD ./var/run/script.sh
